@@ -5,7 +5,7 @@ function Todo() {
   const [task, setTask] = useState("");
   const [todos, setTodos] = useState([]);
 
-  const BASE_URL = "https://todolist-4dck.onrender.com";
+  const BASE_URL = "https://todolist-4dck.onrender.com/api/todos";
 
   const fetchTodos = async () => {
     const res = await axios.get(BASE_URL);
