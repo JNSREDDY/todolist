@@ -5,11 +5,17 @@ function Todo() {
   const [task, setTask] = useState("");
   const [todos, setTodos] = useState([]);
 
+  // ✅ IMPORTANT: Make sure this is EXACTLY your backend URL
   const BASE_URL = "https://todolist-4dck.onrender.com/api/todos";
 
   const fetchTodos = async () => {
-    const res = await axios.get(BASE_URL);
-    setTodos(res.data);
+    try {
+      const res = await axios.get(BASE_URL);
+      console.log("Backend Response:", res.data); // debug
+      setTodos(Array.isArray(res.data) ? res.data : []);
+    } catch (error) {
+      console.error("Fetch Error:", error);
+    }
   };
 
   useEffect(() => {
@@ -18,19 +24,32 @@ function Todo() {
 
   const addTask = async () => {
     if (!task) return;
-    await axios.post(BASE_URL, { task });
-    setTask("");
-    fetchTodos();
+
+    try {
+      await axios.post(BASE_URL, { task });
+      setTask("");
+      fetchTodos();
+    } catch (error) {
+      console.error("Add Error:", error);
+    }
   };
 
   const deleteTask = async (id) => {
-    await axios.delete(`${BASE_URL}/${id}`);
-    fetchTodos();
+    try {
+      await axios.delete(`${BASE_URL}/${id}`);
+      fetchTodos();
+    } catch (error) {
+      console.error("Delete Error:", error);
+    }
   };
 
   const toggleTask = async (id) => {
-    await axios.put(`${BASE_URL}/${id}`);
-    fetchTodos();
+    try {
+      await axios.put(`${BASE_URL}/${id}`);
+      fetchTodos();
+    } catch (error) {
+      console.error("Toggle Error:", error);
+    }
   };
 
   return (
@@ -48,34 +67,28 @@ function Todo() {
       </div>
 
       <ul>
-        {todos.map((todo) => (
-          <li key={todo.id}>
-            <span
-              className="task-text"
-              style={{
-                textDecoration: todo.completed ? "line-through" : "none",
-              }}
-            >
-              {todo.task}
-            </span>
-
-            <div className="btn-group">
-              <button
-                className="done-btn"
-                onClick={() => toggleTask(todo.id)}
+        {Array.isArray(todos) &&
+          todos.map((todo) => (
+            <li key={todo.id}>
+              <span
+                style={{
+                  textDecoration: todo.completed ? "line-through" : "none",
+                }}
               >
-                Done
-              </button>
+                {todo.task}
+              </span>
 
-              <button
-                className="delete-btn"
-                onClick={() => deleteTask(todo.id)}
-              >
-                Delete
-              </button>
-            </div>
-          </li>
-        ))}
+              <div>
+                <button onClick={() => toggleTask(todo.id)}>
+                  Done
+                </button>
+
+                <button onClick={() => deleteTask(todo.id)}>
+                  Delete
+                </button>
+              </div>
+            </li>
+          ))}
       </ul>
     </div>
   );
